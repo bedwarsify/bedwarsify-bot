@@ -7,7 +7,9 @@ interface Profile {
   name: string
 }
 
-export async function getMinecraftProfile(name: string) {
+export async function getMinecraftProfile(
+  name: string
+): Promise<Profile | null> {
   const response = await axios.get(
     `https://api.mojang.com/users/profiles/minecraft/${name}`
   )
@@ -26,7 +28,9 @@ interface ProfileNameHistoryItem {
 
 type ProfileNameHistory = ProfileNameHistoryItem[]
 
-export async function getMinecraftProfileNameHistory(id: string) {
+export async function getMinecraftProfileNameHistory(
+  id: string
+): Promise<ProfileNameHistory | null> {
   const response = await axios.get(
     `https://api.mojang.com/user/profiles/${id}/names`
   )

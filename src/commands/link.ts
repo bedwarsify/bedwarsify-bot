@@ -148,7 +148,7 @@ const link: Command = {
         await interaction.editReply(
           `Your Discord account has been unlinked from Minecraft account ${
             (
-              await getMinecraftProfileNameHistory(user.minecraftId!!)
+              await getMinecraftProfileNameHistory(user.minecraftId!)
             )?.slice(-1)[0].name
           }.`
         )

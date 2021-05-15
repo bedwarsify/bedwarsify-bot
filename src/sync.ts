@@ -3,7 +3,9 @@ import prisma from './prisma'
 import hypixel from './hypixel'
 import { getBedwarsLevelInfo } from '@zikeji/hypixel'
 
-export default async function syncGuildMember(member: GuildMember) {
+export default async function syncGuildMember(
+  member: GuildMember
+): Promise<void> {
   if (member.user.bot) return
 
   const user = await prisma.user.findUnique({
@@ -19,16 +21,16 @@ export default async function syncGuildMember(member: GuildMember) {
 
   if (user === null) {
     if (discordGuild?.linkedRoleId !== null) {
-      await member.roles.remove(discordGuild!!.linkedRoleId)
+      await member.roles.remove(discordGuild!.linkedRoleId)
     }
 
-    await member.setNickname(null).catch(() => {})
+    await member.setNickname(null).catch(() => undefined)
   } else {
     if (discordGuild?.linkedRoleId !== null) {
-      await member.roles.add(discordGuild!!.linkedRoleId)
+      await member.roles.add(discordGuild!.linkedRoleId)
     }
 
-    const hypixelPlayer = await hypixel.player.uuid(user.minecraftId!!)
+    const hypixelPlayer = await hypixel.player.uuid(user.minecraftId!)
 
     if (hypixelPlayer.stats.Bedwars !== undefined) {
       const bedWarsLevelInfo = getBedwarsLevelInfo(hypixelPlayer)
@@ -37,11 +39,11 @@ export default async function syncGuildMember(member: GuildMember) {
         .setNickname(
           `[${bedWarsLevelInfo.level}✫] ${hypixelPlayer.displayname}`
         )
-        .catch(() => {})
+        .catch(() => undefined)
     } else {
       await member
         .setNickname(`[0✫] ${hypixelPlayer.displayname}`)
-        .catch(() => {})
+        .catch(() => undefined)
     }
   }
 }
