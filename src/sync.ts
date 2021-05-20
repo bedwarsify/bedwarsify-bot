@@ -37,12 +37,19 @@ export default async function syncGuildMember(
 
       await member
         .setNickname(
-          `[${bedWarsLevelInfo.level}✫] ${hypixelPlayer.displayname}`
+          `[${bedWarsLevelInfo.level}✫|${(
+            (hypixelPlayer.stats.Bedwars.final_kills_bedwars || 0) /
+            (hypixelPlayer.stats.Bedwars.final_deaths_bedwars !== 0
+              ? hypixelPlayer.stats.Bedwars.final_deaths_bedwars || 1
+              : 1)
+          ).toLocaleString(undefined, { maximumFractionDigits: 1 })}] ${
+            hypixelPlayer.displayname
+          }`
         )
         .catch(() => undefined)
     } else {
       await member
-        .setNickname(`[0✫] ${hypixelPlayer.displayname}`)
+        .setNickname(`[0✫|1] ${hypixelPlayer.displayname}`)
         .catch(() => undefined)
     }
   }
