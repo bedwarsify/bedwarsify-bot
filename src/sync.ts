@@ -49,7 +49,7 @@ export default async function syncGuildMember(
         .catch(() => undefined)
     } else {
       await member
-        .setNickname(`[0✫|1] ${hypixelPlayer.displayname}`)
+        .setNickname(`[0✫|0] ${hypixelPlayer.displayname}`)
         .catch(() => undefined)
     }
   }
