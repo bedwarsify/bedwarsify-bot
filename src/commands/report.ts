@@ -57,6 +57,11 @@ const report: Command = {
         return
       }
 
+      if (!reporterUser.canReport) {
+        await interaction.editReply('You cannot report!')
+        return
+      }
+
       const reporteeMinecraft = await getMinecraftProfile(name)
 
       if (reporteeMinecraft === null) {
