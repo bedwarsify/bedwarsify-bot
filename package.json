@@ -34,7 +34,7 @@
     "@zikeji/hypixel": "^3.1.1",
     "axios": "^0.21.1",
     "bedwarsify-prisma": "git+https://npm@github.com/bedwarsify/bedwarsify-prisma.git",
-    "discord.js": "git+https://npm@github.com/discordjs/discord.js.git",
+    "discord.js": "^13.0.0-dev.dda5ee2e9f0839d3e42d25114ae1b47355cdfd27",
     "dotenv": "^9.0.2"
   },
   "devDependencies": {
