@@ -70,7 +70,7 @@ export async function getStatsMessage(
               ] as number | undefined) || 0) /
                 ((hypixelPlayer.stats.Bedwars?.[
                   modePrefix + 'final_deaths_bedwars'
-                ] as number | undefined) || 0)) **
+                ] as number | undefined) || 1)) **
                 2
             ).toLocaleString(undefined, { maximumFractionDigits: 2 }),
             inline: true,
@@ -90,7 +90,7 @@ export async function getStatsMessage(
               ] as number | undefined) || 0) /
               ((hypixelPlayer.stats.Bedwars?.[
                 modePrefix + 'final_deaths_bedwars'
-              ] as number | undefined) || 0)
+              ] as number | undefined) || 1)
             ).toLocaleString(undefined, { maximumFractionDigits: 2 }),
             inline: true,
           },
@@ -120,7 +120,7 @@ export async function getStatsMessage(
                 | undefined) || 0) /
               ((hypixelPlayer.stats.Bedwars?.[modePrefix + 'losses_bedwars'] as
                 | number
-                | undefined) || 0)
+                | undefined) || 1)
             ).toLocaleString(undefined, { maximumFractionDigits: 2 }),
             inline: true,
           },
@@ -150,7 +150,7 @@ export async function getStatsMessage(
               ] as number | undefined) || 0) /
               ((hypixelPlayer.stats.Bedwars?.[
                 modePrefix + 'beds_lost_bedwars'
-              ] as number | undefined) || 0)
+              ] as number | undefined) || 1)
             ).toLocaleString(undefined, { maximumFractionDigits: 2 }),
             inline: true,
           },
@@ -180,7 +180,7 @@ export async function getStatsMessage(
                 | undefined) || 0) /
               ((hypixelPlayer.stats.Bedwars?.[modePrefix + 'deaths_bedwars'] as
                 | number
-                | undefined) || 0)
+                | undefined) || 1)
             ).toLocaleString(undefined, { maximumFractionDigits: 2 }),
             inline: true,
           },
