@@ -1,5 +1,8 @@
 import { Command } from './index'
-import { getMinecraftProfile, minecraftNameRegex } from '../wrappers/minecraft'
+import {
+  getMinecraftProfileByName,
+  minecraftNameRegex,
+} from '../wrappers/minecraft'
 import prisma from '../prisma'
 import hypixel from '../hypixel'
 import { UserRole } from '@prisma/client'
@@ -36,10 +39,12 @@ const report: Command = {
     ],
   },
   handler: async (interaction) => {
-    await interaction.defer(true)
+    await interaction.defer({ ephemeral: true })
 
-    const name = interaction.options[0].value as string
-    const reason = interaction.options[1].value as 'HACKER' | 'SNIPER'
+    const name = interaction.options.get('name')?.value as string
+    const reason = interaction.options.get('reason')?.value as
+      | 'HACKER'
+      | 'SNIPER'
 
     if (!minecraftNameRegex.test(name)) {
       await interaction.editReply('This is not a valid Minecraft name!')
@@ -62,7 +67,7 @@ const report: Command = {
         return
       }
 
-      const reporteeMinecraft = await getMinecraftProfile(name)
+      const reporteeMinecraft = await getMinecraftProfileByName(name)
 
       if (reporteeMinecraft === null) {
         await interaction.editReply('No player exists with given name!')

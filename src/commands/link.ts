@@ -1,8 +1,8 @@
 import { Command } from './index'
 import prisma from '../prisma'
 import {
-  getMinecraftProfile,
-  getMinecraftProfileNameHistory,
+  getMinecraftProfileById,
+  getMinecraftProfileByName,
   minecraftNameRegex,
 } from '../wrappers/minecraft'
 import hypixel from '../hypixel'
@@ -36,15 +36,16 @@ const link: Command = {
     ],
   },
   handler: async (interaction) => {
-    if (interaction.options[0].name === 'add') {
-      await interaction.defer(true)
+    if (interaction.options.has('add')) {
+      await interaction.defer({ ephemeral: true })
 
-      const name = interaction.options[0].options?.[0].value as string
+      const name = interaction.options.get('add')?.options?.get('name')
+        ?.value as string
 
       if (!minecraftNameRegex.test(name)) {
         await interaction.editReply('This is not a valid Minecraft name!')
       } else {
-        const minecraftProfile = await getMinecraftProfile(name)
+        const minecraftProfile = await getMinecraftProfileByName(name)
 
         if (minecraftProfile === null) {
           await interaction.editReply(
@@ -63,7 +64,7 @@ const link: Command = {
                 '2. Type `/profile`.\n' +
                 '3. Click `Social Media`.\n' +
                 '4. Click `Discord`.\n' +
-                '5. Type your Discord tag (for example `Example#0001`) in chat.'
+                `5. Type \`/ac ${interaction.user.tag}\`.`
             )
           } else {
             await prisma.user
@@ -104,17 +105,13 @@ const link: Command = {
             }
 
             await interaction.editReply(
-              `Your Discord account has been linked to Minecraft account ${
-                (
-                  await getMinecraftProfileNameHistory(minecraftProfile.id)
-                )?.slice(-1)[0].name
-              }.`
+              `Your Discord account has been linked to Minecraft account ${minecraftProfile.name}.`
             )
           }
         }
       }
-    } else if (interaction.options[0].name === 'remove') {
-      await interaction.defer(true)
+    } else if (interaction.options.has('remove')) {
+      await interaction.defer({ ephemeral: true })
 
       const user = await prisma.user.findUnique({
         where: {
@@ -148,8 +145,8 @@ const link: Command = {
         await interaction.editReply(
           `Your Discord account has been unlinked from Minecraft account ${
             (
-              await getMinecraftProfileNameHistory(user.minecraftId!)
-            )?.slice(-1)[0].name
+              await getMinecraftProfileById(user.minecraftId!)
+            ).name
           }.`
         )
       }

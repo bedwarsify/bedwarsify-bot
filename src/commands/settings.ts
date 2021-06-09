@@ -1,5 +1,5 @@
 import { Command } from './index'
-import { GuildMember, Permissions } from 'discord.js'
+import { GuildMember, Permissions, Snowflake } from 'discord.js'
 import prisma from '../prisma'
 
 const settings: Command = {
@@ -44,12 +44,14 @@ const settings: Command = {
         'This command is only available to users with the Manage Guild permission!'
       )
     } else {
-      if (interaction.options[0].name === 'roles') {
-        if (interaction.options[0].options?.[0].name === 'linked') {
-          await interaction.defer(true)
+      if (interaction.options.has('roles')) {
+        if (interaction.options.get('roles')?.options?.has('linked')) {
+          await interaction.defer({ ephemeral: true })
 
-          const roleId = interaction.options[0].options[0].options?.[0]
-            .value as string | undefined
+          const roleId = interaction.options
+            .get('roles')
+            ?.options?.get('linked')
+            ?.options?.get('role') as string | undefined
 
           if (roleId === undefined) {
             await prisma.discordGuild.upsert({
@@ -82,7 +84,7 @@ const settings: Command = {
 
             await interaction.editReply(
               `Set the linked role to ${await interaction.guild.roles.fetch(
-                roleId
+                roleId as Snowflake
               )}.`
             )
           }

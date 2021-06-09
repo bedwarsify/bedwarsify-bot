@@ -1,5 +1,5 @@
 import { Command } from './index'
-import { GuildMember, Permissions } from 'discord.js'
+import { GuildMember, Permissions, Snowflake } from 'discord.js'
 import syncGuildMember from '../sync'
 
 const sync: Command = {
@@ -21,7 +21,7 @@ const sync: Command = {
       })
     } else {
       const userId =
-        (interaction.options[0]?.value as string | undefined) ??
+        (interaction.options.get('user')?.value as string | undefined) ??
         interaction.user.id
 
       if (
@@ -37,9 +37,11 @@ const sync: Command = {
           }
         )
       } else {
-        await interaction.defer(true)
+        await interaction.defer({ ephemeral: true })
 
-        const member = await interaction.guild.members.fetch(userId)
+        const member = await interaction.guild.members.fetch(
+          userId as Snowflake
+        )
 
         if (member.user.bot) {
           await interaction.editReply('You cannot sync bots!')

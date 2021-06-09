@@ -7,7 +7,7 @@ interface Profile {
   name: string
 }
 
-export async function getMinecraftProfile(
+export async function getMinecraftProfileByName(
   name: string
 ): Promise<Profile | null> {
   const response = await axios.get(
@@ -17,6 +17,14 @@ export async function getMinecraftProfile(
   if (response.status === 204) {
     return null
   }
+
+  return response.data as Profile
+}
+
+export async function getMinecraftProfileById(id: string): Promise<Profile> {
+  const response = await axios.get(
+    `https://sessionserver.mojang.com/session/minecraft/profile/${id}`
+  )
 
   return response.data as Profile
 }

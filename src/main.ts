@@ -1,7 +1,8 @@
-import { Client, Intents, Team } from 'discord.js'
+import { Client, Intents, Snowflake, Team } from 'discord.js'
 import dotenv from 'dotenv'
 import commands from './commands'
 import syncGuildMember from './sync'
+import { handleMessageComponentInteraction } from './components'
 
 dotenv.config()
 
@@ -15,7 +16,7 @@ client.once('ready', async () => {
     process.env.COMMANDS_GUILD_ID !== ''
   ) {
     await (
-      await client.guilds.fetch(process.env.COMMANDS_GUILD_ID)
+      await client.guilds.fetch(process.env.COMMANDS_GUILD_ID as Snowflake)
     ).commands.set(commands.map((command) => command.data))
   } else {
     await client.application?.commands.set(
@@ -30,27 +31,29 @@ const interactionCooldown = 5 * 1000
 const lastInteractionAt: { [key: string]: number } = {}
 
 client.on('interaction', async (interaction) => {
-  if (interaction.isCommand()) {
-    if (
-      interaction.client.application?.owner === interaction.user ||
-      (interaction.client.application?.owner instanceof Team &&
-        interaction.client.application.owner.members.has(
-          interaction.user.id
-        )) ||
-      lastInteractionAt[interaction.user.id] === undefined ||
-      Date.now() - lastInteractionAt[interaction.user.id] > interactionCooldown
-    ) {
+  if (
+    interaction.client.application?.owner === interaction.user ||
+    (interaction.client.application?.owner instanceof Team &&
+      interaction.client.application.owner.members.has(interaction.user.id)) ||
+    lastInteractionAt[interaction.user.id] === undefined ||
+    Date.now() - lastInteractionAt[interaction.user.id] > interactionCooldown
+  ) {
+    if (interaction.isCommand()) {
       await commands
         .find((command) => command.data.name === interaction.commandName)
         ?.handler(interaction)
-    } else {
+    } else if (interaction.isMessageComponent()) {
+      await handleMessageComponentInteraction(interaction)
+    }
+  } else {
+    if (interaction.isCommand() || interaction.isMessageComponent()) {
       await interaction.reply(
         `Please wait ${(
           interactionCooldown -
           (Date.now() - lastInteractionAt[interaction.user.id])
         ).toLocaleString(undefined, {
           maximumFractionDigits: 2,
-        })} before using a command!`,
+        })} before another interaction!`,
         {
           ephemeral: true,
         }
