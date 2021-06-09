@@ -44,7 +44,7 @@ export async function getStatsMessage(
             ? (hypixelPlayer.prefix as string).replace(/§./g, '') + ' '
             : hypixelPlayerRank.cleanPrefix
             ? hypixelPlayerRank.cleanPrefix + ' '
-            : '') + hypixelPlayer.displayname,
+            : '') + hypixelPlayer.displayname.replace('_', '\\_'),
         color: Number.parseInt(hypixelPlayerRank.colorHex, 16),
         author: {
           name: `Bed Wars Stats — ${modeFriendlyNames[mode]}`,
