@@ -19,8 +19,6 @@ const stats: Command = {
     ],
   },
   handler: async (interaction) => {
-    await interaction.defer()
-
     const name = interaction.options.get('name')?.value as string | undefined
 
     const interactionUser = !name
@@ -32,25 +30,25 @@ const stats: Command = {
       : null
 
     if (!name && !interactionUser) {
-      await interaction.editReply(
+      await interaction.reply(
         'You must either provide a name or link your account!'
       )
       return
     }
 
     if (name && !minecraftNameRegex.test(name)) {
-      await interaction.editReply('This is not a valid name!')
+      await interaction.reply('This is not a valid name!')
       return
     }
 
     const minecraftProfile = name ? await getMinecraftProfileByName(name) : null
 
     if (name && !minecraftProfile) {
-      await interaction.editReply('No player exists with given name!')
+      await interaction.reply('No player exists with given name!')
       return
     }
 
-    await interaction.editReply(
+    await interaction.reply(
       await getStatsMessage(
         name ? minecraftProfile!.id : interactionUser!.minecraftId!,
         Mode.OVERALL

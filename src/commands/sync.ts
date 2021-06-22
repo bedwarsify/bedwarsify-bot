@@ -16,7 +16,8 @@ const sync: Command = {
   },
   handler: async (interaction) => {
     if (interaction.guild === null) {
-      await interaction.reply('This command can only be used in servers!', {
+      await interaction.reply({
+        content: 'This command can only be used in servers!',
         ephemeral: true,
       })
     } else {
@@ -30,25 +31,28 @@ const sync: Command = {
           Permissions.FLAGS.MANAGE_GUILD
         )
       ) {
-        await interaction.reply(
-          'You must have the Manage Guild permission to be able to sync other users!',
-          {
-            ephemeral: true,
-          }
-        )
+        await interaction.reply({
+          content:
+            'You must have the Manage Guild permission to be able to sync other users!',
+          ephemeral: true,
+        })
       } else {
-        await interaction.defer({ ephemeral: true })
-
         const member = await interaction.guild.members.fetch(
           userId as Snowflake
         )
 
         if (member.user.bot) {
-          await interaction.editReply('You cannot sync bots!')
+          await interaction.reply({
+            content: 'You cannot sync bots!',
+            ephemeral: true,
+          })
         } else {
           await syncGuildMember(member)
 
-          await interaction.editReply(`Synced ${member}.`)
+          await interaction.reply({
+            content: `Synced ${member}.`,
+            ephemeral: true,
+          })
         }
       }
     }

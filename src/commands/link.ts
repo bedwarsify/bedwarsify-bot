@@ -37,35 +37,39 @@ const link: Command = {
   },
   handler: async (interaction) => {
     if (interaction.options.has('add')) {
-      await interaction.defer({ ephemeral: true })
-
       const name = interaction.options.get('add')?.options?.get('name')
         ?.value as string
 
       if (!minecraftNameRegex.test(name)) {
-        await interaction.editReply('This is not a valid Minecraft name!')
+        await interaction.reply({
+          content: 'This is not a valid Minecraft name!',
+          ephemeral: true,
+        })
       } else {
         const minecraftProfile = await getMinecraftProfileByName(name)
 
         if (minecraftProfile === null) {
-          await interaction.editReply(
-            'There is no Minecraft account with given name!'
-          )
+          await interaction.reply({
+            content: 'There is no Minecraft account with given name!',
+            ephemeral: true,
+          })
         } else {
           const hypixelPlayer = await hypixel.player.uuid(minecraftProfile.id)
 
           if (
             hypixelPlayer.socialMedia?.links.DISCORD !== interaction.user.tag
           ) {
-            await interaction.editReply(
-              "This Hypixel player's Discord is not set to your Discord account!\n\n" +
+            await interaction.reply({
+              content:
+                "This Hypixel player's Discord is not set to your Discord account!\n\n" +
                 'To continue:\n' +
                 '1. Join `hypixel.net`.\n' +
                 '2. Type `/profile`.\n' +
                 '3. Click `Social Media`.\n' +
                 '4. Click `Discord`.\n' +
-                `5. Type \`/ac ${interaction.user.tag}\`.`
-            )
+                `5. Type \`/ac ${interaction.user.tag}\`.`,
+              ephemeral: true,
+            })
           } else {
             await prisma.user
               .update({
@@ -104,15 +108,14 @@ const link: Command = {
               await syncGuildMember(interaction.member as GuildMember)
             }
 
-            await interaction.editReply(
-              `Your Discord account has been linked to Minecraft account ${minecraftProfile.name}.`
-            )
+            await interaction.reply({
+              content: `Your Discord account has been linked to Minecraft account ${minecraftProfile.name}.`,
+              ephemeral: true,
+            })
           }
         }
       }
     } else if (interaction.options.has('remove')) {
-      await interaction.defer({ ephemeral: true })
-
       const user = await prisma.user.findUnique({
         where: {
           discordId: interaction.user.id,
@@ -125,9 +128,11 @@ const link: Command = {
       })
 
       if (user === null) {
-        await interaction.editReply(
-          'Your Discord account is not linked to any Minecraft account!'
-        )
+        await interaction.reply({
+          content:
+            'Your Discord account is not linked to any Minecraft account!',
+          ephemeral: true,
+        })
       } else {
         await prisma.user.update({
           where: {
@@ -142,13 +147,14 @@ const link: Command = {
           await syncGuildMember(interaction.member as GuildMember)
         }
 
-        await interaction.editReply(
-          `Your Discord account has been unlinked from Minecraft account ${
+        await interaction.reply({
+          content: `Your Discord account has been unlinked from Minecraft account ${
             (
               await getMinecraftProfileById(user.minecraftId!)
             ).name
-          }.`
-        )
+          }.`,
+          ephemeral: true,
+        })
       }
     }
   },

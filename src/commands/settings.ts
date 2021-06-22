@@ -32,7 +32,8 @@ const settings: Command = {
   },
   handler: async (interaction) => {
     if (interaction.guild === null) {
-      await interaction.reply('This command can only be used in servers!', {
+      await interaction.reply({
+        content: 'This command can only be used in servers!',
         ephemeral: true,
       })
     } else if (
@@ -40,14 +41,14 @@ const settings: Command = {
         Permissions.FLAGS.MANAGE_GUILD
       )
     ) {
-      await interaction.reply(
-        'This command is only available to users with the Manage Guild permission!'
-      )
+      await interaction.reply({
+        content:
+          'This command is only available to users with the Manage Guild permission!',
+        ephemeral: true,
+      })
     } else {
       if (interaction.options.has('roles')) {
         if (interaction.options.get('roles')?.options?.has('linked')) {
-          await interaction.defer({ ephemeral: true })
-
           const roleId = interaction.options
             .get('roles')
             ?.options?.get('linked')
@@ -67,7 +68,10 @@ const settings: Command = {
               },
             })
 
-            await interaction.editReply('Disabled the linked role.')
+            await interaction.reply({
+              content: 'Disabled the linked role.',
+              ephemeral: true,
+            })
           } else {
             await prisma.discordGuild.upsert({
               where: {
@@ -82,11 +86,12 @@ const settings: Command = {
               },
             })
 
-            await interaction.editReply(
-              `Set the linked role to ${await interaction.guild.roles.fetch(
+            await interaction.reply({
+              content: `Set the linked role to ${await interaction.guild.roles.fetch(
                 roleId as Snowflake
-              )}.`
-            )
+              )}.`,
+              ephemeral: true,
+            })
           }
         }
       }

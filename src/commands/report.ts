@@ -39,15 +39,16 @@ const report: Command = {
     ],
   },
   handler: async (interaction) => {
-    await interaction.defer({ ephemeral: true })
-
     const name = interaction.options.get('name')?.value as string
     const reason = interaction.options.get('reason')?.value as
       | 'HACKER'
       | 'SNIPER'
 
     if (!minecraftNameRegex.test(name)) {
-      await interaction.editReply('This is not a valid Minecraft name!')
+      await interaction.reply({
+        content: 'This is not a valid Minecraft name!',
+        ephemeral: true,
+      })
     } else {
       const reporterUser = await prisma.user.findUnique({
         where: {
@@ -56,21 +57,28 @@ const report: Command = {
       })
 
       if (reporterUser === null) {
-        await interaction.editReply(
-          'You must link your account to be able to report users!'
-        )
+        await interaction.reply({
+          content: 'You must link your account to be able to report users!',
+          ephemeral: true,
+        })
         return
       }
 
       if (!reporterUser.canReport) {
-        await interaction.editReply('You cannot report!')
+        await interaction.reply({
+          content: 'You cannot report!',
+          ephemeral: true,
+        })
         return
       }
 
       const reporteeMinecraft = await getMinecraftProfileByName(name)
 
       if (reporteeMinecraft === null) {
-        await interaction.editReply('No player exists with given name!')
+        await interaction.reply({
+          content: 'No player exists with given name!',
+          ephemeral: true,
+        })
         return
       }
 
@@ -85,7 +93,10 @@ const report: Command = {
         (reporteeUser.role === UserRole.DEVELOPER ||
           reporteeUser.role === UserRole.COMMUNITY_MANAGER)
       ) {
-        await interaction.editReply('You cannot report this user!')
+        await interaction.reply({
+          content: 'You cannot report this user!',
+          ephemeral: true,
+        })
         return
       }
 
@@ -102,7 +113,10 @@ const report: Command = {
           },
         })) > 0
       ) {
-        await interaction.editReply('You have already reported this user!')
+        await interaction.reply({
+          content: 'You have already reported this user!',
+          ephemeral: true,
+        })
         return
       }
 
@@ -111,18 +125,20 @@ const report: Command = {
       )
 
       if (reporterHypixel.stats.Bedwars === undefined) {
-        await interaction.editReply(
-          'You must be at least Bed Wars level 50 to report players!'
-        )
+        await interaction.reply({
+          content: 'You must be at least Bed Wars level 50 to report players!',
+          ephemeral: true,
+        })
         return
       }
 
       const reporterLevel = getBedwarsLevelInfo(reporterHypixel)
 
       if (reporterLevel.level < 50) {
-        await interaction.editReply(
-          'You must be at least Bed Wars level 50 to report players!'
-        )
+        await interaction.reply({
+          content: 'You must be at least Bed Wars level 50 to report players!',
+          ephemeral: true,
+        })
         return
       }
 
@@ -136,9 +152,10 @@ const report: Command = {
       })
 
       if (reporterRecentReportsCount >= Math.ceil(reporterLevel.level / 100)) {
-        await interaction.editReply(
-          'You cannot submit any more reports at the moment!'
-        )
+        await interaction.reply({
+          content: 'You cannot submit any more reports at the moment!',
+          ephemeral: true,
+        })
         return
       }
 
@@ -146,7 +163,10 @@ const report: Command = {
       const reporteeRank = getPlayerRank(reporteeHypixel)
 
       if (reporteeRank.staff || reporteeRank.cleanName === 'YOUTUBER') {
-        await interaction.editReply('You cannot report staff or YouTubers!')
+        await interaction.reply({
+          content: 'You cannot report staff or YouTubers!',
+          ephemeral: true,
+        })
         return
       }
 
@@ -156,9 +176,11 @@ const report: Command = {
           : null
 
       if ((reporteeLevel?.level ?? 0) > reporterLevel.level / 2) {
-        await interaction.editReply(
-          'You can only report players who are not more than half your level!'
-        )
+        await interaction.reply({
+          content:
+            'You can only report players who are not more than half your level!',
+          ephemeral: true,
+        })
         return
       }
 
@@ -272,11 +294,12 @@ const report: Command = {
         })
       }
 
-      await interaction.editReply(
-        `Reported ${reporteeHypixel.displayname} for ${
+      await interaction.reply({
+        content: `Reported ${reporteeHypixel.displayname} for ${
           reason === 'SNIPER' ? 'sniping' : 'hacking'
-        }.`
-      )
+        }.`,
+        ephemeral: true,
+      })
     }
   },
 }
