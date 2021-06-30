@@ -51,7 +51,7 @@ export async function getStatsMessage(
           iconURL: 'https://bedwarsify.s3.amazonaws.com/icon.png',
         },
         thumbnail: {
-          url: `https://crafatar.com/avatars/${id}?size=64`,
+          url: `https://crafatar.com/avatars/${id}?size=64&overlay`,
         },
         fields: [
           {

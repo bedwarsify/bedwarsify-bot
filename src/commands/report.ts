@@ -258,7 +258,7 @@ const report: Command = {
               timestamp: new Date().toISOString(),
               color: 0xef4444,
               thumbnail: {
-                url: `https://crafatar.com/avatars/${reporteeHypixel.uuid}?size=128&default=MHF_Steve`,
+                url: `https://crafatar.com/avatars/${reporteeHypixel.uuid}?size=128&overlay`,
               },
               author: {
                 name: `[${reporterLevel?.level ?? 0}|${(
@@ -271,7 +271,7 @@ const report: Command = {
                     ? `${reporterRank.cleanPrefix} `
                     : ''
                 }${reporterHypixel.displayname}`,
-                icon_url: `https://crafatar.com/avatars/${reporterHypixel.uuid}?size=32&default=MHF_Steve`,
+                icon_url: `https://crafatar.com/avatars/${reporterHypixel.uuid}?size=32&overlay`,
               },
               fields: [
                 {
