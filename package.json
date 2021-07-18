@@ -7,7 +7,7 @@
     "start": "node dist/main.js",
     "lint": "eslint src",
     "lint:fix": "npm run lint -- --fix",
-    "dev": "nodemon --watch src --ext ts --exec \"ts-node src/main.ts\""
+    "dev": "ts-node-dev src/main.ts"
   },
   "eslintConfig": {
     "root": true,
@@ -34,7 +34,7 @@
     "@zikeji/hypixel": "^3.1.1",
     "axios": "^0.21.1",
     "bedwarsify-prisma": "git+https://npm@github.com/bedwarsify/bedwarsify-prisma.git",
-    "discord.js": "^13.0.0-dev.dda5ee2e9f0839d3e42d25114ae1b47355cdfd27",
+    "discord.js": "^13.0.0-dev.4d53d0f.1626609771",
     "dotenv": "^9.0.2"
   },
   "devDependencies": {
@@ -44,10 +44,9 @@
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "nodemon": "^2.0.7",
     "prettier": "^2.3.2",
     "prisma": "^2.22.1",
-    "ts-node": "^9.1.1",
+    "ts-node-dev": "^1.1.8",
     "typescript": "^4.2.4"
   },
   "engines": {
