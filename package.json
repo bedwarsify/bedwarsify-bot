@@ -7,7 +7,7 @@
     "start": "node dist/main.js",
     "lint": "eslint src",
     "lint:fix": "npm run lint -- --fix",
-    "dev": "nodemon --watch src --ext ts --exec \"ts-node src/main.ts\""
+    "dev": "ts-node-dev src/main.ts"
   },
   "eslintConfig": {
     "root": true,
@@ -44,10 +44,9 @@
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "nodemon": "^2.0.7",
     "prettier": "^2.3.2",
     "prisma": "^2.22.1",
-    "ts-node": "^9.1.1",
+    "ts-node-dev": "^1.1.8",
     "typescript": "^4.2.4"
   },
   "engines": {
