@@ -28,6 +28,8 @@ client.once('ready', async () => {
   console.log('Ready')
 
   if (process.env.HEARTBEAT_URL) {
+    axios.get(process.env.HEARTBEAT_URL)
+
     setInterval(async () => {
       await axios.get(process.env.HEARTBEAT_URL!)
     }, Number(process.env.HEARTBEAT_INTERVAL || 60e3))
