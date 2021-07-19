@@ -1,5 +1,5 @@
 import { Command } from './index'
-import { GuildMember, Permissions, Snowflake } from 'discord.js'
+import { GuildMember, Permissions, Role, Snowflake } from 'discord.js'
 import prisma from '../prisma'
 
 const settings: Command = {
@@ -22,6 +22,24 @@ const settings: Command = {
                 name: 'role',
                 description:
                   'Role that should be given for linking account (empty to disable)',
+                type: 'ROLE',
+              },
+            ],
+          },
+          {
+            name: 'level',
+            description: 'Set the Discord role given for a Bed Wars level',
+            type: 'SUB_COMMAND',
+            options: [
+              {
+                name: 'level',
+                description: 'Minimum level necessary to receive the role',
+                type: 'INTEGER',
+                required: true,
+              },
+              {
+                name: 'role',
+                description: 'Role that should given (empty to disable)',
                 type: 'ROLE',
               },
             ],
@@ -90,6 +108,62 @@ const settings: Command = {
               content: `Set the linked role to ${await interaction.guild.roles.fetch(
                 roleId as Snowflake
               )}.`,
+              ephemeral: true,
+            })
+          }
+        } else if (interaction.options.get('roles')!.options!.has('level')) {
+          const level = interaction.options
+            .get('roles')!
+            .options!.get('level')!
+            .options!.get('level')!.value as number
+          const role = interaction.options
+            .get('roles')!
+            .options!.get('level')!
+            .options!.get('role')?.role as Role | undefined
+
+          if (!role) {
+            await prisma.discordLevelRole.delete({
+              where: {
+                level_guildId: {
+                  level,
+                  guildId: interaction.guild.id,
+                },
+              },
+            })
+
+            await interaction.reply({
+              content: `Disabled the Bed Wars level ${level} role.`,
+              ephemeral: true,
+            })
+          } else {
+            await prisma.discordLevelRole.upsert({
+              where: {
+                level_guildId: {
+                  level,
+                  guildId: interaction.guild.id,
+                },
+              },
+              update: {
+                id: role.id,
+              },
+              create: {
+                id: role.id,
+                level,
+                guild: {
+                  connectOrCreate: {
+                    where: {
+                      id: interaction.guild.id,
+                    },
+                    create: {
+                      id: interaction.guild.id,
+                    },
+                  },
+                },
+              },
+            })
+
+            await interaction.reply({
+              content: `Set the Bed Wars level ${level} role to ${role}.`,
               ephemeral: true,
             })
           }

@@ -1,7 +1,8 @@
-import { GuildMember } from 'discord.js'
+import { GuildMember, Snowflake } from 'discord.js'
 import prisma from './prisma'
 import hypixel from './hypixel'
 import { getBedwarsLevelInfo } from '@zikeji/hypixel'
+import { calculateBedWarsLevel } from './utils/hypixel'
 
 export default async function syncGuildMember(
   member: GuildMember
@@ -52,5 +53,41 @@ export default async function syncGuildMember(
         .setNickname(`[0✫|0] ${hypixelPlayer.displayname}`)
         .catch(() => undefined)
     }
+
+    const discordLevelRoles = await prisma.discordLevelRole.findMany({
+      where: {
+        guildId: member.guild.id,
+      },
+      orderBy: {
+        level: 'desc',
+      },
+      select: {
+        id: true,
+        level: true,
+      },
+    })
+
+    const level = calculateBedWarsLevel(
+      hypixelPlayer.stats.Bedwars?.Experience_new ||
+        hypixelPlayer.stats.Bedwars?.Experience ||
+        0
+    )
+    let revelantLevelRoleId: string | null = null
+
+    for (const levelRole of discordLevelRoles) {
+      if (level >= levelRole.level) {
+        revelantLevelRoleId = levelRole.id
+        break
+      }
+    }
+
+    await member.roles.add(revelantLevelRoleId as Snowflake).catch(() => {})
+    await member.roles
+      .remove(
+        discordLevelRoles
+          .filter((levelRole) => levelRole.id !== revelantLevelRoleId)
+          .map((levelRole) => levelRole.id as Snowflake)
+      )
+      .catch(() => {})
   }
 }
