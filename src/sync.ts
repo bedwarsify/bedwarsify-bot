@@ -72,20 +72,20 @@ export default async function syncGuildMember(
         hypixelPlayer.stats.Bedwars?.Experience ||
         0
     )
-    let revelantLevelRoleId: string | null = null
+    let relevantLevelRoleId: string | null = null
 
     for (const levelRole of discordLevelRoles) {
       if (level >= levelRole.level) {
-        revelantLevelRoleId = levelRole.id
+        relevantLevelRoleId = levelRole.id
         break
       }
     }
 
-    await member.roles.add(revelantLevelRoleId as Snowflake).catch(() => {})
+    await member.roles.add(relevantLevelRoleId as Snowflake).catch(() => {})
     await member.roles
       .remove(
         discordLevelRoles
-          .filter((levelRole) => levelRole.id !== revelantLevelRoleId)
+          .filter((levelRole) => levelRole.id !== relevantLevelRoleId)
           .map((levelRole) => levelRole.id as Snowflake)
       )
       .catch(() => {})
