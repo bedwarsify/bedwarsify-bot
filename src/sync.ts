@@ -81,13 +81,23 @@ export default async function syncGuildMember(
       }
     }
 
-    await member.roles.add(relevantLevelRoleId as Snowflake).catch(() => {})
     await member.roles
       .remove(
         discordLevelRoles
-          .filter((levelRole) => levelRole.id !== relevantLevelRoleId)
+          .filter(
+            (levelRole) =>
+              levelRole.id !== relevantLevelRoleId ||
+              !member.roles.cache.has(levelRole.id as Snowflake)
+          )
           .map((levelRole) => levelRole.id as Snowflake)
       )
       .catch(() => {})
+
+    if (
+      relevantLevelRoleId &&
+      !member.roles.cache.has(relevantLevelRoleId as Snowflake)
+    ) {
+      await member.roles.add(relevantLevelRoleId as Snowflake).catch(() => {})
+    }
   }
 }
