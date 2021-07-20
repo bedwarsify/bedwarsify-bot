@@ -45,7 +45,7 @@ client.once('ready', async () => {
         orderBy: {
           lastSyncedDiscordAt: 'asc',
         },
-        take: Number(process.env.DISCORD_AUTO_SYNC_MEMBER_COUNT || 0),
+        take: Number(process.env.DISCORD_AUTO_SYNC_MEMBER_COUNT || 10),
       })
 
       const guild = await client.guilds
