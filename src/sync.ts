@@ -99,5 +99,14 @@ export default async function syncGuildMember(
     ) {
       await member.roles.add(relevantLevelRoleId as Snowflake).catch(() => {})
     }
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        lastSyncedDiscordAt: new Date(),
+      },
+    })
   }
 }

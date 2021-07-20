@@ -4,6 +4,7 @@ import commands from './commands'
 import syncGuildMember from './sync'
 import { handleMessageComponentInteraction } from './components'
 import axios from 'axios'
+import prisma from './prisma'
 
 dotenv.config()
 
@@ -26,6 +27,46 @@ client.once('ready', async () => {
   }
 
   console.log('Ready')
+
+  if (process.env.DISCORD_AUTO_SYNC_GUILD_ID) {
+    setInterval(async () => {
+      const users = await prisma.user.findMany({
+        where: {
+          minecraftId: {
+            not: null,
+          },
+          discordId: {
+            not: null,
+          },
+        },
+        select: {
+          discordId: true,
+        },
+        orderBy: {
+          lastSyncedDiscordAt: 'asc',
+        },
+        take: Number(process.env.DISCORD_AUTO_SYNC_MEMBER_COUNT || 0),
+      })
+
+      const guild = await client.guilds
+        .fetch(process.env.DISCORD_AUTO_SYNC_GUILD_ID as Snowflake)
+        .catch(() => null)
+
+      if (!guild) return
+
+      await Promise.all(
+        users.map(async (user) => {
+          const member = await guild.members
+            .fetch(user.discordId as Snowflake)
+            .catch(() => null)
+
+          if (!member) return
+
+          await syncGuildMember(member)
+        })
+      )
+    }, 60e3)
+  }
 
   if (process.env.HEARTBEAT_URL) {
     axios.get(process.env.HEARTBEAT_URL)
