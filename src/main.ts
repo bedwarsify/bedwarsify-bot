@@ -30,23 +30,40 @@ client.once('ready', async () => {
 
   if (process.env.DISCORD_AUTO_SYNC_GUILD_ID) {
     setInterval(async () => {
-      const users = await prisma.user.findMany({
-        where: {
-          minecraftId: {
-            not: null,
+      const users = [
+        ...(await prisma.user.findMany({
+          where: {
+            minecraftId: {
+              not: null,
+            },
+            discordId: {
+              not: null,
+            },
+            lastSyncedDiscordAt: null,
           },
-          discordId: {
-            not: null,
+          select: {
+            discordId: true,
           },
-        },
-        select: {
-          discordId: true,
-        },
-        orderBy: {
-          lastSyncedDiscordAt: 'asc',
-        },
-        take: Number(process.env.DISCORD_AUTO_SYNC_MEMBER_COUNT || 10),
-      })
+          take: Number(process.env.DISCORD_AUTO_SYNC_MEMBER_COUNT || 10),
+        })),
+        ...(await prisma.user.findMany({
+          where: {
+            minecraftId: {
+              not: null,
+            },
+            discordId: {
+              not: null,
+            },
+          },
+          select: {
+            discordId: true,
+          },
+          orderBy: {
+            lastSyncedDiscordAt: 'asc',
+          },
+          take: Number(process.env.DISCORD_AUTO_SYNC_MEMBER_COUNT || 10),
+        })),
+      ].slice(0, Number(process.env.DISCORD_AUTO_SYNC_MEMBER_COUNT || 10))
 
       const guild = await client.guilds
         .fetch(process.env.DISCORD_AUTO_SYNC_GUILD_ID as Snowflake)
