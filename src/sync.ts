@@ -68,8 +68,8 @@ export default async function syncGuildMember(
     })
 
     const level = calculateBedWarsLevel(
-      hypixelPlayer.stats.Bedwars?.Experience_new ||
-        hypixelPlayer.stats.Bedwars?.Experience ||
+      hypixelPlayer.stats.Bedwars?.Experience ||
+        hypixelPlayer.stats.Bedwars?.Experience_new ||
         0
     )
     let relevantLevelRoleId: string | null = null
