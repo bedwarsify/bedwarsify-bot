@@ -77,9 +77,18 @@ client.once('ready', async () => {
             .fetch(user.discordId as Snowflake)
             .catch(() => null)
 
-          if (!member) return
-
-          await syncGuildMember(member)
+          if (!member) {
+            await prisma.user.update({
+              where: {
+                discordId: user.discordId!,
+              },
+              data: {
+                lastSyncedDiscordAt: new Date(),
+              },
+            })
+          } else {
+            await syncGuildMember(member)
+          }
         })
       )
     }, 60e3)
