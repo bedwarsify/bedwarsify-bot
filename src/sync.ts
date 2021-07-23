@@ -13,96 +13,100 @@ export default async function syncGuildMember(
     where: {
       discordId: member.id,
     },
-  })
-  const discordGuild = await prisma.discordGuild.findUnique({
-    where: {
-      id: member.guild.id,
+    select: {
+      minecraftId: true,
     },
   })
 
-  if (user === null) {
-    if (discordGuild?.linkedRoleId !== null) {
-      await member.roles.remove(discordGuild!.linkedRoleId)
-    }
-
-    await member.setNickname(null).catch(() => undefined)
-  } else {
-    if (discordGuild?.linkedRoleId !== null) {
-      await member.roles.add(discordGuild!.linkedRoleId)
-    }
-
-    const hypixelPlayer = await hypixel.player.uuid(user.minecraftId!)
-
-    if (hypixelPlayer.stats.Bedwars !== undefined) {
-      const bedWarsLevelInfo = getBedwarsLevelInfo(hypixelPlayer)
-
-      await member
-        .setNickname(
-          `[${bedWarsLevelInfo.level}✫|${(
-            (hypixelPlayer.stats.Bedwars.final_kills_bedwars || 0) /
-            (hypixelPlayer.stats.Bedwars.final_deaths_bedwars !== 0
-              ? hypixelPlayer.stats.Bedwars.final_deaths_bedwars || 1
-              : 1)
-          ).toLocaleString(undefined, { maximumFractionDigits: 1 })}] ${
-            hypixelPlayer.displayname
-          }`
-        )
-        .catch(() => undefined)
-    } else {
-      await member
-        .setNickname(`[0✫|0] ${hypixelPlayer.displayname}`)
-        .catch(() => undefined)
-    }
-
-    const discordLevelRoles = await prisma.discordLevelRole.findMany({
-      where: {
-        guildId: member.guild.id,
+  const guild = await prisma.discordGuild.findUnique({
+    where: {
+      id: member.guild.id,
+    },
+    select: {
+      linkedRoleId: true,
+      levelRoles: {
+        select: {
+          id: true,
+          level: true,
+        },
+        orderBy: {
+          level: 'desc',
+        },
       },
-      orderBy: {
-        level: 'desc',
-      },
-      select: {
-        id: true,
-        level: true,
-      },
-    })
+    },
+  })
 
-    const level = calculateBedWarsLevel(
-      hypixelPlayer.stats.Bedwars?.Experience ||
-        hypixelPlayer.stats.Bedwars?.Experience_new ||
-        0
-    )
-    let relevantLevelRoleId: string | null = null
-
-    for (const levelRole of discordLevelRoles) {
-      if (level >= levelRole.level) {
-        relevantLevelRoleId = levelRole.id
-        break
-      }
+  if (!user || !user.minecraftId) {
+    if (member.nickname !== null) {
+      await member.setNickname(null).catch(() => {})
     }
 
-    await member.roles
-      .remove(
-        discordLevelRoles
-          .filter(
-            (levelRole) =>
-              levelRole.id !== relevantLevelRoleId ||
-              !member.roles.cache.has(levelRole.id as Snowflake)
-          )
-          .map((levelRole) => levelRole.id as Snowflake)
-      )
-      .catch(() => {})
+    if (!guild) return
 
     if (
-      relevantLevelRoleId &&
-      !member.roles.cache.has(relevantLevelRoleId as Snowflake)
+      guild.linkedRoleId &&
+      member.roles.cache.has(guild.linkedRoleId as Snowflake)
     ) {
-      await member.roles.add(relevantLevelRoleId as Snowflake).catch(() => {})
+      await member.roles.remove(guild.linkedRoleId)
+    }
+
+    await member.roles.remove(
+      guild.levelRoles
+        .filter((levelRole) =>
+          member.roles.cache.has(levelRole.id as Snowflake)
+        )
+        .map((levelRole) => levelRole.id)
+    )
+  } else {
+    const player = await hypixel.player.uuid(user.minecraftId)
+
+    const level = calculateBedWarsLevel(
+      player.stats.Bedwars?.Experience ||
+        player.stats.Bedwars?.Experience_new ||
+        0
+    )
+
+    const finalKillDeathRatio =
+      (player.stats.Bedwars?.final_kills_bedwars || 0) /
+      (player.stats.Bedwars?.final_deaths_bedwars || 1)
+
+    const nickname = `[${Math.floor(level)}✫|${
+      Math.floor(finalKillDeathRatio * 10) / 10
+    }] ${player.displayname}`
+
+    if (member.nickname !== nickname) {
+      await member.setNickname(nickname).catch(() => {})
+    }
+
+    if (guild) {
+      if (
+        guild.linkedRoleId &&
+        !member.roles.cache.has(guild.linkedRoleId as Snowflake)
+      ) {
+        await member.roles.add(guild.linkedRoleId)
+      }
+
+      const revelantLevelRole = guild.levelRoles.find(
+        (levelRole) => level >= levelRole.level
+      )
+
+      await member.roles.remove(
+        guild.levelRoles
+          .filter((levelRole) => levelRole !== revelantLevelRole)
+          .map((levelRole) => levelRole.id as Snowflake)
+      )
+
+      if (
+        revelantLevelRole &&
+        !member.roles.cache.has(revelantLevelRole.id as Snowflake)
+      ) {
+        await member.roles.add(revelantLevelRole.id)
+      }
     }
 
     await prisma.user.update({
       where: {
-        id: user.id,
+        discordId: member.id,
       },
       data: {
         lastSyncedDiscordAt: new Date(),
