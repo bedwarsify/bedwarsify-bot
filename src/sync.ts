@@ -7,6 +7,8 @@ import { calculateBedWarsLevel } from './utils/hypixel'
 export default async function syncGuildMember(
   member: GuildMember
 ): Promise<void> {
+  return
+
   if (member.user.bot) return
 
   const user = await prisma.user.findUnique({
